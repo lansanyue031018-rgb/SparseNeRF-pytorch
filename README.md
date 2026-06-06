@@ -1,0 +1,2 @@
+# SparseNeRF-pytorch
+基于sparsenerf官方项目的pytorch实现版本，主要在pytorch中实现了深度排序损失的正则化约束，并添加一些额外的局部优化功能选项。参考项目的原作者Github官方仓库：https://github.com/Wanggcong/SparseNeRF
