@@ -85,7 +85,8 @@ L_total = L_rgb + lambda_rank * L_rank
 | CUDA | 11.3 |
 | GPU | NVIDIA GeForce RTX 3060 6 GB |
 
-当前仓库暂未提供锁定版本的 `requirements.txt`。
+Python 依赖已记录在 `requirements.txt` 中。其版本对应论文实验环境；如果使用更新的
+CUDA、显卡或操作系统，可能需要调整个别依赖版本。
 
 ## 安装
 
@@ -96,18 +97,22 @@ cd SparseNeRF-pytorch
 conda create -n depnerf python=3.9.7
 conda activate depnerf
 
-pip install torch==1.11.0 torchvision==0.12.0 \
-  --extra-index-url https://download.pytorch.org/whl/cu113
-
-pip install numpy opencv-python pillow imageio imageio-ffmpeg tqdm \
-  tensorboard torchmetrics lpips scipy matplotlib
+pip install -r requirements.txt
 ```
 
-网格提取和批量实验脚本使用的可选依赖：
+对于论文测试使用的 CUDA 11.3 环境，在安装依赖文件后重新安装对应 CUDA 版本的
+PyTorch：
 
 ```bash
-pip install plyfile PyMCubes open3d pyyaml
+pip install --force-reinstall \
+  torch==1.11.0+cu113 \
+  torchvision==0.12.0+cu113 \
+  torchaudio==0.11.0 \
+  --index-url https://download.pytorch.org/whl/cu113
 ```
+
+当前 `requirements.txt` 未固定网格提取可能使用的 `plyfile`、`PyMCubes` 和
+`open3d` 等可选依赖。
 
 ## 数据集准备
 
@@ -135,9 +140,18 @@ images_4/000.png
 depth_maps/depth_000.png
 ```
 
-当前 LLFF 数据加载器要求场景目录中存在单目深度图。辅助脚本
-`get_depth_map_for_llff_dtu.py` 使用 MiDaS/DPT 生成深度先验，但脚本中的
-MiDaS 仓库、权重和缓存路径目前仍是本机绝对路径。运行前需要先修改脚本顶部的对应路径：
+单目相对深度先验图属于数据集准备环节，不在 NeRF 训练过程中在线生成。可以使用
+[MiDaS](https://github.com/isl-org/MiDaS)、
+[Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2)
+或其他相对深度模型自行生成。将每张结果转换为单通道图像，推荐保存为 16 位 PNG，
+文件名前增加 `depth_`，然后放入对应场景的 `depth_maps/` 目录。
+
+当前排序采样器采用**逆深度约定：数值越大表示越近，数值越小表示越远**。如果所用模型
+输出的是度量深度或远近顺序相反，需要先进行取反或等价转换，再用于训练。
+
+仓库中的辅助脚本 `get_depth_map_for_llff_dtu.py` 使用 MiDaS/DPT。脚本目前保留了
+原实验机器的绝对路径。运行前需要将两处 `repo_or_dir` 修改为本机 MiDaS 仓库路径，
+并将 `weight_path` 修改为已下载的模型权重路径：
 
 ```bash
 python get_depth_map_for_llff_dtu.py \
@@ -184,6 +198,26 @@ python train.py \
   --scene horns \
   --log_dir log/horns_depnerf \
   --continue_training
+```
+
+### 批量实验（实验性功能）
+
+`run_experiments.py` 用于按顺序连续训练多个数据集或配置。一个训练任务达到预设里程碑
+或退出后，脚本会读取 `exp_plan.json` 并自动开始下一个任务；如果检测到已有权重，
+也可以自动继续训练。
+
+仓库中保留的默认值来自原 Windows 实验环境，不能直接用于其他机器。使用前需要修改：
+
+- `run_experiments.py` 中 `--plan`、`--python`、`--logs-dir` 的默认绝对路径，
+  或在命令行中显式传入。
+- `exp_plan.json` 中的 `global.log_dir` 和每个任务的 `cwd`。
+- 适用于自己数据集的场景名、稀疏比例、随机种子、重复次数和 `extra_args`。
+
+```bash
+python run_experiments.py \
+  --plan /path/to/exp_plan.json \
+  --python /path/to/python \
+  --logs-dir /path/to/scheduler_logs
 ```
 
 ### 主要配置参数
@@ -257,12 +291,13 @@ extract_mesh.py                 # 可选网格提取
 - 结果依赖单目深度质量、COLMAP 位姿精度、视角覆盖范围和场景本身。
 - 反光、透明、弱纹理和重复纹理区域可能产生错误排序先验。
 - 当前仓库未包含自制数据集和预训练权重。
-- MiDaS 和批量实验脚本仍有需要修改的本机 Windows 绝对路径。
+- MiDaS 辅助脚本和实验性批量训练脚本仍包含示例 Windows 绝对路径，必须按实际机器
+  修改或通过命令行覆盖。
 - 部分历史布尔命令行参数使用 `store_false`，行为不够直观。
 
 ## 后续计划
 
-- 补充固定版本的环境和依赖文件。
+- 补充跨平台 Conda 环境或容器环境定义。
 - 移除深度生成与批量实验脚本中的本机绝对路径。
 - 发布可复现配置、预训练权重和可视化对比结果。
 - 补充深度排序和边缘采样机制的消融实验。
@@ -276,6 +311,7 @@ extract_mesh.py                 # 可选网格提取
 - [Mip-NeRF: A Multiscale Representation for Anti-Aliasing Neural Radiance Fields](https://jonbarron.info/mipnerf/)
 - [NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis](https://www.matthewtancik.com/nerf)
 - [MiDaS](https://github.com/isl-org/MiDaS)
+- [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2)
 
 ## 引用
 
@@ -300,5 +336,9 @@ extract_mesh.py                 # 可选网格提取
 
 ## 许可证
 
-当前仓库尚未添加独立许可证。在许可证明确之前，默认版权限制仍然适用。来源于上游项目
-的代码和思想仍受各自许可证约束，其中包括 SparseNeRF 官方仓库的非商业使用条款。
+本仓库中的原创贡献采用 [MIT License](LICENSE) 发布。
+
+第三方代码、上游衍生代码、模型、权重、数据集和素材仍受各自许可证约束。特别是原始
+SparseNeRF 仓库采用带有非商业限制的
+[S-Lab License 1.0](https://github.com/Wanggcong/SparseNeRF/blob/main/LICENSE)；
+本仓库的 MIT 许可证不会覆盖或取消这些限制。

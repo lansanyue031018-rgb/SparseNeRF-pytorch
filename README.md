@@ -95,7 +95,9 @@ The thesis experiments used:
 | CUDA | 11.3 |
 | GPU | NVIDIA GeForce RTX 3060 6 GB |
 
-The repository currently does not include a pinned `requirements.txt`.
+Pinned Python dependencies are listed in `requirements.txt`. The versions
+reflect the thesis environment and may need adjustment for newer CUDA, GPU, or
+operating-system combinations.
 
 ## Installation
 
@@ -106,18 +108,22 @@ cd SparseNeRF-pytorch
 conda create -n depnerf python=3.9.7
 conda activate depnerf
 
-pip install torch==1.11.0 torchvision==0.12.0 \
-  --extra-index-url https://download.pytorch.org/whl/cu113
-
-pip install numpy opencv-python pillow imageio imageio-ffmpeg tqdm \
-  tensorboard torchmetrics lpips scipy matplotlib
+pip install -r requirements.txt
 ```
 
-Optional dependencies used by mesh extraction and experiment scheduling:
+For the tested CUDA 11.3 environment, reinstall the CUDA-specific PyTorch
+wheels after the requirements file:
 
 ```bash
-pip install plyfile PyMCubes open3d pyyaml
+pip install --force-reinstall \
+  torch==1.11.0+cu113 \
+  torchvision==0.12.0+cu113 \
+  torchaudio==0.11.0 \
+  --index-url https://download.pytorch.org/whl/cu113
 ```
+
+Optional mesh-extraction dependencies such as `plyfile`, `PyMCubes`, and
+`open3d` are not pinned in the current requirements file.
 
 ## Dataset Preparation
 
@@ -142,10 +148,22 @@ Depth-map filenames must match the RGB image filenames with a `depth_` prefix.
 For example, `images_4/000.png` corresponds to
 `depth_maps/depth_000.png`.
 
-The current LLFF loader requires monocular depth maps. The helper script
-`get_depth_map_for_llff_dtu.py` uses MiDaS/DPT, but its MiDaS repository,
-checkpoint, and cache paths are currently machine-specific. Update those paths
-at the top of the script before running:
+Monocular relative-depth priors are part of dataset preparation rather than
+the NeRF training loop. You can generate them with
+[MiDaS](https://github.com/isl-org/MiDaS),
+[Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2), or
+another relative-depth model. Convert each output to a single-channel image
+(16-bit PNG is recommended), add the `depth_` filename prefix, and place it in
+the scene's `depth_maps/` directory.
+
+The ranking sampler assumes an **inverse-depth convention: larger values are
+nearer and smaller values are farther**. If a model exports metric depth or the
+opposite ordering, invert or otherwise convert the values before training.
+
+The included helper script `get_depth_map_for_llff_dtu.py` uses MiDaS/DPT. It
+currently contains machine-specific absolute paths. Before running it, edit
+both `repo_or_dir` entries to point to your local MiDaS checkout and update
+`weight_path` to the downloaded checkpoint:
 
 ```bash
 python get_depth_map_for_llff_dtu.py \
@@ -194,6 +212,29 @@ python train.py \
   --scene horns \
   --log_dir log/horns_depnerf \
   --continue_training
+```
+
+### Batch experiments (experimental)
+
+`run_experiments.py` is an experimental sequential scheduler for running
+multiple dataset/configuration jobs. After one training job reaches its
+configured milestone or exits, the scheduler starts the next run in
+`exp_plan.json`; existing checkpoints can be resumed automatically.
+
+The checked-in defaults are examples from the original Windows experiment
+environment and are not portable as-is. Before use, update:
+
+- `--plan`, `--python`, and `--logs-dir` defaults in `run_experiments.py`, or
+  pass them explicitly on the command line.
+- `global.log_dir` and every run's `cwd` in `exp_plan.json`.
+- Scene names, sparse ratios, seeds, repeat counts, and `extra_args` for your
+  own datasets and hardware.
+
+```bash
+python run_experiments.py \
+  --plan /path/to/exp_plan.json \
+  --python /path/to/python \
+  --logs-dir /path/to/scheduler_logs
 ```
 
 ### Main configuration options
@@ -273,13 +314,13 @@ extract_mesh.py                 # Optional mesh extraction
   produce incorrect depth rankings.
 - The self-captured datasets and pretrained checkpoints are not currently
   included.
-- MiDaS and experiment-runner scripts still contain machine-specific Windows
-  paths that must be edited.
+- The MiDaS helper and experimental batch scheduler contain example absolute
+  Windows paths that must be replaced or overridden for each machine.
 - Some legacy boolean CLI flags use `store_false` and may be unintuitive.
 
 ## Roadmap
 
-- Add a pinned environment/requirements file.
+- Add a cross-platform Conda or container environment definition.
 - Remove machine-specific paths from depth generation and experiment scripts.
 - Publish reproducible configs, checkpoints, and visual comparisons.
 - Add ablation results for ranking and edge-sampling components.
@@ -293,6 +334,7 @@ This project is inspired by and builds on ideas from:
 - [Mip-NeRF: A Multiscale Representation for Anti-Aliasing Neural Radiance Fields](https://jonbarron.info/mipnerf/)
 - [NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis](https://www.matthewtancik.com/nerf)
 - [MiDaS](https://github.com/isl-org/MiDaS)
+- [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2)
 
 ## Citation
 
@@ -318,7 +360,12 @@ and Mip-NeRF papers:
 
 ## License
 
-No standalone license has been added to this repository yet. Until licensing is
-clarified, the default copyright restrictions apply. Code and ideas derived
-from upstream projects remain subject to their respective licenses, including
-the original SparseNeRF repository's non-commercial terms.
+Original contributions in this repository are released under the
+[MIT License](LICENSE).
+
+Third-party code, upstream-derived code, models, checkpoints, datasets, and
+assets remain subject to their respective licenses. In particular, the
+original SparseNeRF repository uses the
+[S-Lab License 1.0](https://github.com/Wanggcong/SparseNeRF/blob/main/LICENSE)
+with non-commercial terms; this repository's MIT license does not override
+those restrictions.
