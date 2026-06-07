@@ -4,14 +4,14 @@
 
 这是一个受
 [SparseNeRF](https://github.com/Wanggcong/SparseNeRF)
-启发、面向稀疏视图新视图合成任务的非官方 PyTorch 研究实现。论文中将该改进方法命名为
+启发、面向稀疏视图新视图合成任务的非官方 PyTorch 研究实现。本仓库将该改进方法命名为
 **Dep-NeRF**。项目保留 Mip-NeRF 主干，在训练阶段加入局部相对深度排序约束、
 边缘 RGB 副采样和可配置的数据集稀疏化功能。
 
 > [!IMPORTANT]
 > 本项目不是 SparseNeRF 官方实现，也不是逐行移植版本。与原始 SparseNeRF
 > 不同，本实现**只使用深度排序损失，不包含深度连续性损失**。项目主要用于科研复现、
-> 毕业设计实验和稀疏视图新视图合成研究。
+> 稀疏视图新视图合成实验和相关研究。
 
 ## 项目特点
 
@@ -55,9 +55,9 @@ L_total = L_rgb + lambda_rank * L_rank
 | 边界补偿 | 边缘/四角 RGB-only 副采样 |
 | 数据集稀疏化 | LLFF 稀疏比例和 Blender 稀疏 JSON 文件 |
 
-## 论文实验结果
+## 实验结果
 
-以下结果来自毕业论文中的统一条件对比实验。PSNR、SSIM 越高越好，LPIPS
+以下结果来自统一条件下的对比实验。PSNR、SSIM 越高越好，LPIPS
 越低越好。
 
 | 数据集 | 训练视图 | 模型 | PSNR | SSIM | LPIPS |
@@ -72,7 +72,7 @@ L_total = L_rgb + lambda_rank * L_rank
 | 自制室内东方红机车场景 | 4 | Mip-NeRF | 16.0914 | 0.5654 | 0.5536 |
 | 自制室内东方红机车场景 | 4 | Dep-NeRF | **16.4870** | **0.6042** | **0.5298** |
 
-实验结果表明，该方法主要适合**少视图训练场景**。论文中的密集视图实验没有显示出
+实验结果表明，该方法主要适合**少视图训练场景**。密集视图实验没有显示出
 相对 Mip-NeRF 的稳定提升。当多视图监督已经较充分时，建议减小
 `depth_rank_weight` 或关闭深度排序正则项。
 
@@ -85,7 +85,7 @@ L_total = L_rgb + lambda_rank * L_rank
 | CUDA | 11.3 |
 | GPU | NVIDIA GeForce RTX 3060 6 GB |
 
-Python 依赖已记录在 `requirements.txt` 中。其版本对应论文实验环境；如果使用更新的
+Python 依赖已记录在 `requirements.txt` 中。其版本对应测试环境；如果使用更新的
 CUDA、显卡或操作系统，可能需要调整个别依赖版本。
 
 ## 安装
@@ -100,7 +100,7 @@ conda activate depnerf
 pip install -r requirements.txt
 ```
 
-对于论文测试使用的 CUDA 11.3 环境，在安装依赖文件后重新安装对应 CUDA 版本的
+对于测试使用的 CUDA 11.3 环境，在安装依赖文件后重新安装对应 CUDA 版本的
 PyTorch：
 
 ```bash
@@ -170,7 +170,7 @@ python get_depth_map_for_llff_dtu.py \
 
 ## 训练
 
-接近论文对比实验设置的训练命令：
+接近稀疏视图对比实验设置的训练命令：
 
 ```bash
 python train.py \
@@ -235,7 +235,7 @@ python run_experiments.py \
 | `chunks` | `4096` | 分块渲染时每块射线数 |
 
 当前 `loss.py` 中的 `margin_pair` 和 `neighbor_pair_weight` 还是函数默认参数，
-尚未作为命令行参数暴露。论文对比实验使用了 `margin_pair=1e-4`。复现实验前应核对
+尚未作为命令行参数暴露。对比实验使用了 `margin_pair=1e-4`。复现实验前应核对
 当前实现中的实际参数，不应只根据配置表推断。
 
 ## 评估

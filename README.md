@@ -4,7 +4,7 @@
 
 An unofficial PyTorch research implementation inspired by
 [SparseNeRF](https://github.com/Wanggcong/SparseNeRF) for sparse-view novel
-view synthesis. The method is called **Dep-NeRF** in the accompanying thesis.
+view synthesis. This repository refers to the improved method as **Dep-NeRF**.
 It keeps a Mip-NeRF backbone and adds local relative-depth ranking, edge-aware
 RGB sampling, and configurable dataset sparsification.
 
@@ -12,7 +12,7 @@ RGB sampling, and configurable dataset sparsification.
 > This is not an official or line-by-line port of SparseNeRF. Unlike the
 > original method, this implementation uses **depth-ranking loss only** and
 > does **not** include the spatial depth-continuity loss. The repository is
-> intended for research, reproduction, and graduation-project experiments.
+> intended for research, reproduction, and sparse-view novel view synthesis experiments.
 
 ## Highlights
 
@@ -61,9 +61,9 @@ the Mip-NeRF backbone; the main changes are in `loss.py`, `datasets.py`,
 | Boundary compensation | Edge/corner RGB-only auxiliary sampling |
 | Sparse dataset support | Configurable LLFF ratio and Blender sparse JSON file |
 
-## Reported Results
+## Experimental Results
 
-The following results are reported in the graduation thesis. All models were
+The following results are from controlled comparison experiments. All models were
 trained and evaluated under matched settings. Higher PSNR/SSIM and lower LPIPS
 are better.
 
@@ -86,7 +86,7 @@ When multi-view supervision is already sufficient, reduce
 
 ## Tested Environment
 
-The thesis experiments used:
+The tested experiments used:
 
 | Component | Version |
 | --- | --- |
@@ -96,7 +96,7 @@ The thesis experiments used:
 | GPU | NVIDIA GeForce RTX 3060 6 GB |
 
 Pinned Python dependencies are listed in `requirements.txt`. The versions
-reflect the thesis environment and may need adjustment for newer CUDA, GPU, or
+reflect the tested environment and may need adjustment for newer CUDA, GPU, or
 operating-system combinations.
 
 ## Installation
@@ -184,7 +184,7 @@ python get_depth_map_for_llff_dtu.py \
 
 ## Training
 
-Example configuration close to the thesis comparison setting:
+Example configuration close to the sparse-view comparison setting:
 
 ```bash
 python train.py \
@@ -252,7 +252,7 @@ python run_experiments.py \
 | `chunks` | `4096` | Rendering chunk size |
 
 In the current `loss.py`, `margin_pair` and `neighbor_pair_weight` are function
-defaults rather than command-line arguments. The thesis comparison used
+defaults rather than command-line arguments. The comparison setting used
 `margin_pair=1e-4`; check the implementation before claiming exact
 reproduction of a specific experiment.
 
