@@ -1,0 +1,10 @@
+round: 6
+start_utc: 2026-05-15T22:47:28.308907
+seed: 20
+train_log_dir: log/room_sr1p0_seed20_log_006
+auto_continue: True
+command: 'E:\PycharmProject\mipnerf-pytorch-main\.venv\Scripts\python.exe' train.py --max_steps 200000 --save_every 33000 --dataset_name llff --log_dir log/room_sr1p0_seed20_log_006 --scene room --sparse_ratio 1.0 --continue_training --batch_size 1024
+
+
+end_utc: 2026-05-16T02:59:03.017035
+return_code: 1

@@ -1,0 +1,10 @@
+round: 1
+start_utc: 2026-05-14T13:51:49.934215
+seed: 0
+train_log_dir: log/my5_sr0p2_seed0_log_001
+auto_continue: False
+command: 'E:\PycharmProject\mipnerf-pytorch-main\.venv\Scripts\python.exe' train.py --max_steps 200000 --save_every 33000 --dataset_name llff --log_dir log/my5_sr0p2_seed0_log_001 --scene my5 --sparse_ratio 0.2 --batch_size 1024 --factor 1
+
+
+end_utc: 2026-05-14T17:12:22.792879
+return_code: 1

@@ -1,0 +1,10 @@
+round: 5
+start_utc: 2026-05-15T19:58:56.947727
+seed: 20
+train_log_dir: log/trex_sr1p0_seed20_log_005
+auto_continue: True
+command: 'E:\PycharmProject\mipnerf-pytorch-main\.venv\Scripts\python.exe' train.py --max_steps 200000 --save_every 33000 --dataset_name llff --log_dir log/trex_sr1p0_seed20_log_005 --scene trex --sparse_ratio 1.0 --continue_training --batch_size 1024
+
+
+end_utc: 2026-05-15T22:47:28.306673
+return_code: 1

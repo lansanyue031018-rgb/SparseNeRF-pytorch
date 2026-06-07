@@ -1,0 +1,87 @@
+{
+  "global": {
+    "max_steps": 200000,
+    "save_every": 33000,
+    "milestone_steps": 33000,
+    "exit_after_milestone": true,
+    "dataset_name": "llff",
+    "override_defaults": false,
+    "log_dir": "log"
+  },
+  "continue_on_error": true,
+  "max_rounds": 8,
+  "runs": [
+    {
+      "scene": "my6",
+      "sparse_ratio": 0.1,
+      "seed": 0,
+      "repeat": 1,
+      "cwd": "E:/PycharmProject/mipnerf-pytorch-main/aaa_optimized_version/sparsenerf_only_rank_loss",
+      "auto_continue": true,
+      "extra_args": "--batch_size 1024 --factor 1"
+    },
+    {
+      "scene": "my6",
+      "sparse_ratio": 0.1,
+      "seed": 0,
+      "repeat": 1,
+      "cwd": "E:/PycharmProject/mipnerf-pytorch-main",
+      "auto_continue": true,
+      "extra_args": "--batch_size 1024 --factor 1"
+    },
+    {
+      "scene": "my4",
+      "sparse_ratio": 1,
+      "seed": 10,
+      "repeat": 1,
+      "cwd": "E:/PycharmProject/mipnerf-pytorch-main/aaa_optimized_version/sparsenerf_only_rank_loss",
+      "auto_continue": true,
+      "extra_args": "--batch_size 1024"
+    },
+    {
+      "scene": "my4",
+      "sparse_ratio": 1,
+      "seed": 10,
+      "repeat": 1,
+      "cwd": "E:/PycharmProject/mipnerf-pytorch-main",
+      "auto_continue": true,
+      "extra_args": "--batch_size 1024"
+    },
+    {
+      "scene": "trex",
+      "sparse_ratio": 1,
+      "seed": 20,
+      "repeat": 1,
+      "cwd": "E:/PycharmProject/mipnerf-pytorch-main",
+      "auto_continue": true,
+      "extra_args": "--batch_size 1024"
+    },
+    {
+      "scene": "room",
+      "sparse_ratio": 1,
+      "seed": 20,
+      "repeat": 1,
+      "cwd": "E:/PycharmProject/mipnerf-pytorch-main",
+      "auto_continue": true,
+      "extra_args": "--batch_size 1024"
+    },
+    {
+      "scene": "my6",
+      "sparse_ratio": 1,
+      "seed": 0,
+      "repeat": 10,
+      "cwd": "E:/PycharmProject/mipnerf-pytorch-main/aaa_optimized_version/sparsenerf_only_rank_loss",
+      "auto_continue": true,
+      "extra_args": "--batch_size 1024 --factor 1"
+    },
+    {
+      "scene": "my6",
+      "sparse_ratio": 1,
+      "seed": 0,
+      "repeat": 10,
+      "cwd": "E:/PycharmProject/mipnerf-pytorch-main",
+      "auto_continue": true,
+      "extra_args": "--batch_size 1024 --factor 1"
+    }
+  ]
+}
